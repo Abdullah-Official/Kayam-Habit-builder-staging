@@ -32,9 +32,8 @@ model Challenges {
 model Notifications {
   id  Int  @id @default(autoincrement())
   userId Int
-  userChallenge   UserChallenge @relation(fields: [userChallengeId], references: [id])
-  userChallengeId Int @unique
-  dateTime DateTime
+  userChallenge UserChallenge?
+  time String
   activeTillDateTime DateTime
   isActive Boolean @default(false)
   createdAt       DateTime  @default(now())
@@ -43,7 +42,8 @@ model Notifications {
 
 model UserChallenge {
   id  Int  @id @default(autoincrement())
-  notification Notifications?
+   notification   Notifications @relation(fields: [notificationId], references: [id])
+  notificationId Int @unique
   challengeId Int
   userId Int
   score Int @default(0)

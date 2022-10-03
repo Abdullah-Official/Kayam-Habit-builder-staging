@@ -2,7 +2,7 @@ const express = require("express");
 const morgan = require("morgan");
 const cors = require("cors");
 const dotenv = require("dotenv");
-// const indexRoutes = require("./routes/index.js");
+const indexRoutes = require("./routes/index.js");
 
 const app = express();
 dotenv.config();
@@ -21,7 +21,7 @@ app.use(morgan("tiny"));
 const PORT = process.env.PORT || 4000;
 
 // Routers
-// app.use("/", indexRoutes);
+app.use("/", indexRoutes);
 
 app.get("/", (req, res) => {
   return res.send("KAYAM HABIT BUILDER STAGING LIVE");
