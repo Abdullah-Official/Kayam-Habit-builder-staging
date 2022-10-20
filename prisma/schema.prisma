@@ -2,7 +2,8 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-1.0.x"]
 }
 
 datasource db {
@@ -10,56 +11,57 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
-model Category{
-  id  Int @default(autoincrement()) @id
-  categoryName String @db.VarChar(255)
-  challenges Challenges[]
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+model Category {
+  id           Int          @id @default(autoincrement())
+  categoryName String       @db.VarChar(255)
+  challenges   Challenges[]
+  image        String?       @db.VarChar(256)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
 }
 
 model Challenges {
-  id  Int  @id @default(autoincrement())
-  category   Category @relation(fields: [categoryId], references: [id])
-  categoryId Int
-  name String @db.VarChar(255)
-  description String @db.VarChar(1000)
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  id           Int      @id @default(autoincrement())
+  category     Category @relation(fields: [categoryId], references: [id])
+  categoryId   Int
+  name         String   @db.VarChar(255)
+  description  String   @db.VarChar(1000)
+  aceChallenge String?   @db.VarChar(1000)
+  image        String?   @db.VarChar(256)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
 
 model Notifications {
-  id  Int  @id @default(autoincrement())
-  userId Int
-  userChallenge UserChallenge?
-  time String
+  id                 Int            @id @default(autoincrement())
+  userId             Int
+  userChallenge      UserChallenge?
+  time               String
   activeTillDateTime DateTime
-  isActive Boolean @default(false)
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  isActive           Boolean        @default(false)
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
 }
 
 model UserChallenge {
-  id  Int  @id @default(autoincrement())
-   notification   Notifications @relation(fields: [notificationId], references: [id])
-  notificationId Int @unique
-  challengeId Int
-  userId Int
-  score Int @default(0)
-  isInProgress Boolean @default(true)
-  isCompleted Boolean @default(false)
-  isPending Boolean
-  startDateTime DateTime
-  endDateTime DateTime
-  day1 Boolean @default(false)
-  day2 Boolean @default(false)
-  day3 Boolean @default(false)
-  day4 Boolean @default(false)
-  day5 Boolean @default(false)
-  day6 Boolean @default(false)
-  day7 Boolean @default(false)
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  id             Int           @id @default(autoincrement())
+  notification   Notifications @relation(fields: [notificationId], references: [id])
+  notificationId Int           @unique
+  challengeId    Int
+  userId         Int
+  score          Int           @default(0)
+  isInProgress   Boolean       @default(true)
+  isCompleted    Boolean       @default(false)
+  isPending      Boolean
+  startDateTime  DateTime
+  endDateTime    DateTime
+  day1           Boolean       @default(false)
+  day2           Boolean       @default(false)
+  day3           Boolean       @default(false)
+  day4           Boolean       @default(false)
+  day5           Boolean       @default(false)
+  day6           Boolean       @default(false)
+  day7           Boolean       @default(false)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
 }
-

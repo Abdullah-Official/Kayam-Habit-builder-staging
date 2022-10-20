@@ -27,4 +27,18 @@ const getChallenges = async (req, res) => {
   }
 };
 
-module.exports = { getCategories, getChallenges };
+const getChallengesByCategoryId = async (req, res) => {
+  const {categoryId} = req.body;
+  try {
+    const challenges = await prisma.challenges.findMany({where:{categoryId} ,include: {category:true}});
+    if (challenges.length) {
+      res.status(200).json({ success: true, challenges });
+    } else {
+      response.sendBadRequest(res, "There are no challenges with the given category id");
+    }
+  } catch (error) {
+    response.sendBadRequest(res, error?.message);
+  }
+};
+
+module.exports = { getCategories, getChallenges, getChallengesByCategoryId };

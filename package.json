@@ -5,7 +5,7 @@
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon start"
+    "start": "nodemon server.js"
   },
   "prisma": {
     "seed": "node prisma/seed.js"
@@ -25,9 +25,13 @@
     "jsonwebtoken": "^8.5.1",
     "moment": "^2.29.4",
     "morgan": "^1.10.0",
-    "nodemon": "^2.0.20"
+    "nodemon": "^2.0.20",
+    "serverless-http": "^3.0.3"
   },
   "devDependencies": {
-    "prisma": "^4.4.0"
+    "prisma": "^4.4.0",
+    "serverless-dotenv-plugin": "^4.0.2",
+    "serverless-webpack": "^5.10.0",
+    "serverless-webpack-prisma": "^1.1.1"
   }
 }

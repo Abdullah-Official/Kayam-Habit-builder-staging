@@ -27,10 +27,6 @@ app.get("/", (req, res) => {
   return res.send("KAYAM HABIT BUILDER STAGING LIVE");
 });
 
-//server connection
-app.listen(PORT, (err) => {
-  if (err) throw err;
-  console.log(`Server running in http://127.0.0.1:${PORT}`);
-});
+
 
 module.exports = app;
