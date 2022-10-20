@@ -45,6 +45,9 @@ functions:
           path: habits/challenges
           method: GET
       - http:
+          path: habits/challenges
+          method: POST
+      - http:
           path: habits/start-challenge
           method: POST
       - http:

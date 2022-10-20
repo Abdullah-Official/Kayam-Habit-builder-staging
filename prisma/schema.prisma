@@ -15,7 +15,7 @@ model Category {
   id           Int          @id @default(autoincrement())
   categoryName String       @db.VarChar(255)
   challenges   Challenges[]
-  image        String?       @db.VarChar(256)
+  image        String?      @db.VarChar(256)
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
 }
@@ -26,8 +26,8 @@ model Challenges {
   categoryId   Int
   name         String   @db.VarChar(255)
   description  String   @db.VarChar(1000)
-  aceChallenge String?   @db.VarChar(1000)
-  image        String?   @db.VarChar(256)
+  aceChallenge String?  @db.VarChar(1000)
+  image        String?  @db.VarChar(256)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
