@@ -62,6 +62,12 @@ functions:
       - http:
           path: habits/notification-status
           method: PUT
+      - http:
+          path: habits/complete-challenge
+          method: PUT
+      - http:
+          path: habits/current-challenge
+          method: POST
     environment:
       PORT: 4000
       DATABASE_URL: "mysql://admin:kayam123kayam123@kayam-habit-builder-staging.colgsq2adoyw.us-east-1.rds.amazonaws.com:3306/prisma"

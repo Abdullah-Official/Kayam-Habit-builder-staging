@@ -53,7 +53,7 @@ model UserChallenge {
   isInProgress   Boolean       @default(true)
   isCompleted    Boolean       @default(false)
   isPending      Boolean
-  startDateTime  DateTime
+  startDateTime  DateTime    
   endDateTime    DateTime
   day1           Boolean       @default(false)
   day2           Boolean       @default(false)

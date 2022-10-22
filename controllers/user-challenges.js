@@ -2,6 +2,21 @@ const response = require("../helpers/response");
 const moment = require("moment");
 const { prisma } = require("../helpers/prisma-client");
 
+const dateEnumerator = (startDateTime, endDateTime) => {
+  var dates = [];
+
+  var currDate = moment(startDateTime).startOf("day");
+  var lastDate = moment(endDateTime).startOf("day");
+  let i = 0;
+  while (currDate.add(i == 0 ? 0 : 1, "days").diff(lastDate) < 0) {
+    // console.log(currDate.toDate());
+    dates.push(currDate.clone().toDate().toDateString());
+    i++;
+  }
+
+  return dates;
+};
+
 async function startChallenge(req, res) {
   const { userId, challengeId } = req.body;
   const startDateTime = new Date().toISOString();
@@ -12,6 +27,9 @@ async function startChallenge(req, res) {
         id: challengeId,
       },
     });
+    // const userChallenge = await prisma.userChallenge.findFirst({
+    //   where: { userId, isInProgress: true},
+    // });
     if (challenge?.id) {
       const notification = await prisma.notifications.create({
         data: {
@@ -132,6 +150,26 @@ const getUserChallenges = async (req, res) => {
   }
 };
 
+const getCurrentUserChallenge = async (req, res) => {
+  const { userId } = req.body;
+  try {
+    const userChallenge = await prisma.userChallenge.findFirst({
+      where: { userId, isInProgress: true },
+      include: { notification: true },
+    });
+    if (userChallenge) {
+      res.status(200).json({ success: true, userChallenge });
+    } else {
+      response.sendBadRequest(
+        res,
+        "There is no user challenge exist with this userId"
+      );
+    }
+  } catch (error) {
+    response.sendBadRequest(res, error?.message);
+  }
+};
+
 const setNotificationStatus = async (req, res) => {
   const { notificationId, isActive } = req.body;
 
@@ -153,10 +191,66 @@ const setNotificationStatus = async (req, res) => {
   }
 };
 
+const dailyComplete = async (req, res) => {
+  const { userChallengeId, userId, score } = req.body;
+  try {
+    const userChallenge = await prisma.userChallenge.findFirst({
+      where: { id: userChallengeId, userId, isInProgress: true },
+    });
+    if (!userChallenge) {
+      return response.sendBadRequest(
+        res,
+        "No User Challenge found with the given details"
+      );
+    }
+    const dates = dateEnumerator(
+      userChallenge?.startDateTime,
+      userChallenge?.endDateTime
+    );
+
+    const todayDate = new Date().toDateString();
+    const index = dates.indexOf(todayDate);
+    if (index >= 0 && index !== 6) {
+      const updatedChallenge = await prisma.userChallenge.update({
+        data: {
+          [`day${index + 1}`]: true,
+        },
+        where: {
+          id: userChallengeId,
+        },
+      });
+      res.status(200).json({ success: true, updatedChallenge });
+    } else if (index === 6) {
+      const updatedChallenge = await prisma.userChallenge.update({
+        data: {
+          ["isInProgress"]: false,
+          ["isCompleted"]: true,
+          [`day${index + 1}`]: true,
+          ["isPending"]: false,
+          score
+        },
+        where: {
+          id: userChallengeId,
+        },
+      });
+      res.status(200).json({ success: true, updatedChallenge });
+    } else {
+      response.sendBadRequest(
+        res,
+        "Can't update user challenge, maybe your challenge is completed"
+      );
+    }
+  } catch (error) {
+    response.sendBadRequest(res, error?.message);
+  }
+};
+
 module.exports = {
   startChallenge,
   updateChallenge,
   getAllUserChallenges,
   getUserChallenges,
   setNotificationStatus,
+  getCurrentUserChallenge,
+  dailyComplete,
 };
