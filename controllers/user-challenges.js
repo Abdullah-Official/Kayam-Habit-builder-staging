@@ -18,45 +18,98 @@ const dateEnumerator = (startDateTime, endDateTime) => {
 };
 
 async function startChallenge(req, res) {
-  const { userId, challengeId } = req.body;
+  const { userId, challengeId, score } = req.body;
+  const userCurrentChallenge = await prisma.userChallenge.findFirst({
+    where: { userId, isInProgress: true },
+  });
   const startDateTime = new Date().toISOString();
   const endDateTime = moment(startDateTime).add(7, "days").toISOString();
   try {
-    const challenge = await prisma.challenges.findUnique({
-      where: {
-        id: challengeId,
-      },
-    });
-    // const userChallenge = await prisma.userChallenge.findFirst({
-    //   where: { userId, isInProgress: true},
-    // });
-    if (challenge?.id) {
-      const notification = await prisma.notifications.create({
+    if (userCurrentChallenge?.id) {
+      const updateUserChallenge = await prisma.userChallenge.update({
         data: {
-          userId,
-          time: new Date().toLocaleTimeString(),
-          activeTillDateTime: endDateTime,
+          isInProgress: false,
+          score,
+        },
+        where: {
+          id: userCurrentChallenge?.id,
         },
       });
-      if (notification?.id) {
-        const userChallenge = await prisma.userChallenge.create({
-          data: {
-            notificationId: notification?.id,
-            userId,
-            challengeId,
-            isPending: true,
-            startDateTime,
-            endDateTime,
+      if (updateUserChallenge) {
+        const challenge = await prisma.challenges.findUnique({
+          where: {
+            id: challengeId,
           },
         });
-        if (userChallenge?.id) {
-          res.status(200).json({ success: true, userChallenge, notification });
+        if (challenge?.id) {
+          const notification = await prisma.notifications.create({
+            data: {
+              userId,
+              time: new Date().toLocaleTimeString(),
+              activeTillDateTime: endDateTime,
+            },
+          });
+          if (notification?.id) {
+            const userChallenge = await prisma.userChallenge.create({
+              data: {
+                notificationId: notification?.id,
+                userId,
+                challengeId,
+                isPending: true,
+                startDateTime,
+                endDateTime,
+              },
+            });
+            if (userChallenge?.id) {
+              res
+                .status(200)
+                .json({ success: true, userChallenge, notification });
+            } else {
+              response.sendBadRequest(res, "Can't create User Challenge");
+            }
+          }
         } else {
-          response.sendBadRequest(res, "Can't create User Challenge");
+          response.sendBadRequest(res, "No Challenge Found!");
         }
+      } else {
+        response.sendBadRequest(res, "Can't Start New challenge");
       }
     } else {
-      response.sendBadRequest(res, "No Challenge Found!");
+      const challenge = await prisma.challenges.findUnique({
+        where: {
+          id: challengeId,
+        },
+      });
+      if (challenge?.id) {
+        const notification = await prisma.notifications.create({
+          data: {
+            userId,
+            time: new Date().toLocaleTimeString(),
+            activeTillDateTime: endDateTime,
+          },
+        });
+        if (notification?.id) {
+          const userChallenge = await prisma.userChallenge.create({
+            data: {
+              notificationId: notification?.id,
+              userId,
+              challengeId,
+              isPending: true,
+              startDateTime,
+              endDateTime,
+            },
+          });
+          if (userChallenge?.id) {
+            res
+              .status(200)
+              .json({ success: true, userChallenge, notification });
+          } else {
+            response.sendBadRequest(res, "Can't create User Challenge");
+          }
+        }
+      } else {
+        response.sendBadRequest(res, "No Challenge Found!");
+      }
     }
   } catch (error) {
     response.sendBadRequest(res, error?.message);
@@ -157,8 +210,17 @@ const getCurrentUserChallenge = async (req, res) => {
       where: { userId, isInProgress: true },
       include: { notification: true },
     });
+    const challenge = await prisma.challenges.findUnique({
+      where: { id: userChallenge?.challengeId },
+    });
+    console.log(challenge?.image);
     if (userChallenge) {
-      res.status(200).json({ success: true, userChallenge });
+      res
+        .status(200)
+        .json({
+          success: true,
+          userChallenge: { ...userChallenge, challengeImage: challenge?.image },
+        });
     } else {
       response.sendBadRequest(
         res,
@@ -227,7 +289,7 @@ const dailyComplete = async (req, res) => {
           ["isCompleted"]: true,
           [`day${index + 1}`]: true,
           ["isPending"]: false,
-          score
+          score,
         },
         where: {
           id: userChallengeId,
@@ -245,6 +307,45 @@ const dailyComplete = async (req, res) => {
   }
 };
 
+
+const resetChallenge = async (req,res) => {
+  const {userChallengeId, userId}  = req.body;
+  const startDateTime = new Date().toISOString();
+  const endDateTime = moment(startDateTime).add(7, "days").toISOString();
+  try {
+      const userChallenge = await prisma.userChallenge.update({
+        data: {
+          startDateTime,
+          endDateTime,
+          day1: false,
+          day2: false,
+          day3: false,
+          day4: false,
+          day5: false,
+          day6: false,
+          day7: false,
+          isInProgress: true,
+          isPending: true,
+          isCompleted: false,
+          userId,
+          score: 0
+        },
+        where: {id: userChallengeId,}
+      })
+      if(userChallenge){
+        res.status(200).json({ success: true, userChallenge });
+      }else{
+        response.sendBadRequest(
+          res,
+          "Can't reset User Challenge"
+        );
+      }
+      
+  } catch (error) {
+    response.sendBadRequest(res, error?.message)
+  }
+}
+
 module.exports = {
   startChallenge,
   updateChallenge,
@@ -253,4 +354,5 @@ module.exports = {
   setNotificationStatus,
   getCurrentUserChallenge,
   dailyComplete,
+  resetChallenge
 };

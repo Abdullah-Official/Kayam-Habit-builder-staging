@@ -68,6 +68,9 @@ functions:
       - http:
           path: habits/current-challenge
           method: POST
+      - http:
+          path: habits/reset-challenge
+          method: PUT
     environment:
       PORT: 4000
       DATABASE_URL: "mysql://admin:kayam123kayam123@kayam-habit-builder-staging.colgsq2adoyw.us-east-1.rds.amazonaws.com:3306/prisma"
