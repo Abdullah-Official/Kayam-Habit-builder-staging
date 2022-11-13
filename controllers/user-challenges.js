@@ -213,13 +213,12 @@ const getCurrentUserChallenge = async (req, res) => {
     const challenge = await prisma.challenges.findUnique({
       where: { id: userChallenge?.challengeId },
     });
-    console.log(challenge?.image);
     if (userChallenge) {
       res
         .status(200)
         .json({
           success: true,
-          userChallenge: { ...userChallenge, challengeImage: challenge?.image },
+          userChallenge: { ...userChallenge, challengeImage: challenge?.image, challengeName: challenge?.name, challengeDescription: challenge?.description },
         });
     } else {
       response.sendBadRequest(
